@@ -1,0 +1,128 @@
+--// SPECIFICATIONS
+
+local StabCooldown = false
+local HitCheck = game:GetService("Players").LocalPlayer:WaitForChild("PlayerScripts"):WaitForChild("localknifehandler"):WaitForChild("HitCheck")
+local AutofarmEnabled = false
+local ServerHop = false
+
+
+--// AUTOFARM 
+
+local XenowareFreeAutofarm = game:GetService("RunService").Heartbeat:Connect(function()
+    if AutofarmEnabled == true then
+           
+        -- TWEEN
+        if game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("ScreenGui"):WaitForChild("UI").Target.Visible and game.Workspace[game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.UI.Target.TargetText.Text] then -- if target frame visible and target exists
+            local AutofarmTween = game:GetService('TweenService'):Create(game:GetService("Players").LocalPlayer.Character.HumanoidRootPart, TweenInfo.new(0,Enum.EasingStyle.Linear), {CFrame = game.Workspace[game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.UI.Target.TargetText.Text].HumanoidRootPart.CFrame * CFrame.new(0 ,3, 1)})
+            AutofarmTween:Play()
+        end   
+        
+        -- STAB
+        if StabCooldown == false and game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui"):WaitForChild("ScreenGui"):WaitForChild("UI").Target.Visible and game.Workspace[game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.UI.Target.TargetText.Text] then
+            local TargetMagnitude = (game.Workspace[game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.UI.Target.TargetText.Text].HumanoidRootPart.Position - game:GetService("Players").LocalPlayer.Character.HumanoidRootPart.Position).magnitude
+            if TargetMagnitude <= 5 then -- checks player is within stab range
+                StabCooldown = true
+                game:GetService("Players").LocalPlayer.PlayerScripts.localknifehandler.HitCheck:Fire(game.Workspace[game:GetService("Players").LocalPlayer.PlayerGui.ScreenGui.UI.Target.TargetText.Text])
+                wait(0.8) -- do not change cooldown time or anticheat will kick you 
+                StabCooldown = false
+            end
+        end
+        
+        -- EQUIP KNIFE
+        if game:GetService("Players").LocalPlayer.Backpack.Knife then
+            game:GetService("Players").LocalPlayer.Character.Humanoid:EquipTool(game:GetService("Players").LocalPlayer.Backpack.Knife)
+        else
+            wait()
+        end  
+    end
+end)
+
+local XenowareFreeAutofarm = game:GetService("RunService").Heartbeat:Connect(function()
+    if AutofarmEnabled == true then
+        -- SET GRAVITY
+        if game:GetService("Workspace").Gravity ~= 1 then
+            game:GetService("Workspace").Gravity = 1
+        end
+        -- REMOVE LIMBS
+        if game:GetService("Players").LocalPlayer.Character['Left Leg'] and game:GetService("Players").LocalPlayer.Character['Right Leg'] and game:GetService("Players").LocalPlayer.Character['Left Arm'] then
+            game:GetService("Players").LocalPlayer.Character['Left Leg']:remove()
+            game:GetService("Players").LocalPlayer.Character['Right Leg']:remove()   
+            game:GetService("Players").LocalPlayer.Character['Left Arm']:remove()
+        end
+    elseif AutofarmEnabled == false then
+        game:GetService("Workspace").Gravity = 196.2
+    end
+end)
+
+local XenowareFreeAutofarm = game:GetService("RunService").Heartbeat:Connect(function()
+    if AutofarmEnabled == true and ServerHop == true then
+        -- SERVER HOP
+        local PlayersInGame = 0 
+        for i,v in pairs(game:GetService("Players"):GetDescendants()) do
+            if v:IsA("Player") then 
+               PlayersInGame = PlayersInGame + 1 
+            end
+        end
+        if PlayersInGame < 4 then
+            -- THIS IS NOT MY SERVER HOP, SO CREDITS TO WHOEVER MADE IT!!
+            loadstring(game:HttpGet"https://raw.githubusercontent.com/LeoKholYt/roblox/main/lk_serverhop.lua")():Teleport(game.PlaceId)
+        end
+    end
+end)
+
+
+--// GUI
+
+
+-- BYPASS
+
+local Core = game:GetService("CoreGui")
+
+Core.ChildAdded:Connect(function(name)
+    wait()
+    local o = name.Name
+    if name.Name == "a" then
+        return
+    else
+        name.Name = "a"
+        name.Parent = game.Workspace
+        local ScreenGui = Instance.new("ScreenGui")
+        local Frame = Instance.new("Frame")
+        ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+        ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+        Frame.Parent = ScreenGui
+        Frame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        Frame.Position = UDim2.new(-100000, -100000, -100000, 0)
+        Frame.Size = UDim2.new(0, 100, 0, 100)
+        name.Parent = ScreenGui
+        wait(1)
+        name.Name = o
+        game.Players.LocalPlayer.CharacterRemoving:Connect(function()
+            ScreenGui.Parent = game.Workspace
+        end)
+        game.Players.LocalPlayer.CharacterAdded:Connect(function()
+           ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+        end)
+    end
+end)
+
+-- MAIN
+
+local library = loadstring(game:HttpGet(('https://raw.githubusercontent.com/bloodball/-back-ups-for-libs/main/wall%20v3')))()
+local Window = library:CreateWindow("paid")
+
+local Main = Window:CreateFolder("Main")
+
+Main:Toggle("Autofarm",function(bool)
+    AutofarmEnabled = bool
+end)
+
+Main:Toggle("Server Hop",function(bool)
+    ServerHop = bool
+end)
+
+Main:DestroyGui()
+
+Main:Button("Discord",function()
+    setclipboard("discord.gg/NRVrwW9vPa")
+end)
